@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import random
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -11,11 +10,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Custom Theme and Styles ---
+# --- Custom Styles ---
 st.markdown("""
     <style>
     body, .main, .block-container {background-color: #f8f5f2;}
-    .main-title {font-size: 2.5rem; font-weight: 700; color: #6f4e37;}
+    .main-title {font-size: 2.5rem; font-weight: 700; color: #6f4e37; text-align: center;}
     .menu-card {background: #fff; border-radius: 14px; padding: 1.2em; margin-bottom: 1.2em; box-shadow: 0 2px 8px #e0e0e0;}
     .menu-card img {border-radius: 10px;}
     .stButton>button {background-color: #6f4e37; color: #fff; border-radius: 8px;}
@@ -68,10 +67,6 @@ def clear_cart():
 def remove_cart_item(index):
     del st.session_state.cart[index]
 
-def update_cart_quantity(index, new_quantity):
-    st.session_state.cart[index]['Quantity'] = new_quantity
-    st.session_state.cart[index]['Subtotal'] = st.session_state.cart[index]['Price'] * new_quantity
-
 def format_currency(amount):
     return f"₹{amount:,.2f}"
 
@@ -84,13 +79,12 @@ page = st.sidebar.radio("Go to", ["View Menu & Order", "View Orders", "Manage Me
 st.sidebar.markdown("---")
 st.sidebar.success("Welcome to the Cafeteria Management System!")
 
-# --- Random Food Video ---
-if page == "View Menu & Order":
-    st.video("https://www.youtube.com/watch?v=4aZr5hZXP_s")  # Random food video
-
 # --- Page 1: View Menu & Order ---
 if page == "View Menu & Order":
     st.header("🍽️ Menu")
+
+    # Display a smaller random food video
+    st.video("https://www.youtube.com/watch?v=4aZr5hZXP_s", start_time=10, format="video/mp4", height=200)
 
     available_menu_df = get_available_menu()
 
@@ -158,11 +152,7 @@ if page == "View Menu & Order":
                     st.image(row['Image'], width=60)
                     st.write(row['Name'])
                 with cart_cols[1]:
-                    new_quantity = st.number_input(
-                        "Qty", min_value=1, value=row['Quantity'], step=1, key=f"qty_{i}"
-                    )
-                    if new_quantity != row['Quantity']:
-                        update_cart_quantity(i, new_quantity)
+                    st.write(row['Quantity'])
                 with cart_cols[2]:
                     st.write(format_currency(row['Price']))
                 with cart_cols[3]:
@@ -173,9 +163,7 @@ if page == "View Menu & Order":
                         st.experimental_rerun()
 
             total_cart_amount = cart_df['Subtotal'].sum()
-            total_items = sum(item['Quantity'] for item in st.session_state.cart)
-            st.metric("Total Items", total_items)
-            st.metric("Total Cart Amount", format_currency(total_cart_amount))
+            st.metric("Total Cart Amount:", format_currency(total_cart_amount))
 
             col_cart1, col_cart2 = st.columns([1, 1])
             with col_cart1:
